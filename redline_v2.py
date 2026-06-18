@@ -239,6 +239,7 @@ def load_environment(
     num_train: int = 64,
     num_eval: int = 32,
     seed: int = 0,
+    system_prompt: Optional[str] = None,
     **kwargs,
 ) -> vf.Environment:
     dataset = build_dataset(num_train, seed=seed)
@@ -254,7 +255,7 @@ def load_environment(
         dataset=dataset,
         eval_dataset=eval_dataset,
         rubric=rubric,
-        system_prompt=SYSTEM_PROMPT,
+        system_prompt=system_prompt or SYSTEM_PROMPT,
         total_rounds=total_rounds,
         **kwargs,
     )

@@ -44,3 +44,11 @@ prime eval run redline-v2
 - `scoring.py`: pure-Python reward core (deal model, Pareto frontier, scorer). Runs standalone.
 - `redline_v2.py`: the `vf.MultiTurnEnv` wrapper, opposing-counsel policy, dataset, and `load_environment`.
 - `SPEC.md`: design notes and the milestone ladder toward self-play.
+
+### Limitations
+Be aware of what this version does and does not model:
+- The opposing counsel is a deterministic rule-based policy, not a learned or LLM agent. It concedes on the terms it weights low and holds firm on the ones it weights high. This is enough to make logrolling pay off and to leak priority signal, but a trained model can learn to exploit a fixed opponent. Self-play is the planned fix (see SPEC.md).
+- Scenarios are synthetic: term weights and BATNAs are sampled, not drawn from real contracts. The verifiable reward is real, but the term valuations are stand-ins for a real playbook. Grounding the weights in an actual MSA playbook is the planned step toward realism.
+- Term values are continuous in [0,1] and treated as independent. Real contract terms interact, and the language-to-value mapping is itself a judgment task this version abstracts away.
+
+This is a research environment for studying verifiable-reward negotiation, not a claim that contract negotiation is solved.
