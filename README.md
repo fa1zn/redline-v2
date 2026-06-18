@@ -5,15 +5,21 @@
 - **Short description**: Multi-term contract negotiation where the model trades across interdependent terms against an opposing-counsel vendor, scored by a verifiable Pareto-frontier reward with no judge in the loop.
 - **Tags**: multi-turn, negotiation, legal, self-play, train, eval
 
-### The thesis
+### The idea
 
-This project is one bet: you can build verifiable rewards for soft domains, no judge in the loop. Math and code are easy to grade because the answer checks itself. Negotiation is supposedly not, so people grade it with a human or an LLM judge. This says you don't have to.
+How do you tell whether an AI did a good job at something like negotiating? With math or code you can just check the answer. A negotiation has no obvious right answer, so normally you would have a person, or another AI, read it over and give an opinion. That is slow, and it is a little subjective.
 
-v1 made the claim on the easy case: it scored a single liability cap as one number. The fair pushback was that real soft domains have no single right answer, they are multi-objective and full of tradeoffs, and there the judge comes back. v2 is that hard case. The deal is now a vector of terms each side weights differently, so there is no single best outcome, only better and worse trades. And the reward still comes with no judge, because it falls out of the structure of the deal itself: how close the agreement sits to the best possible trade between the two sides (the Pareto frontier).
+The first version of this tried the simplest case. The AI negotiated a single dollar amount, and you could score how it did just by looking at the final number, with nobody judging it.
 
-So the throughline is v1 to v2: from "soft domains can be scored" to "even multi-objective soft domains with no answer key can be scored from their own structure, and the signal is strong enough to optimize against." The honest boundary: the remaining human-judgment step is putting numbers on the objectives (how much each term is worth). Everything after that grades itself.
+Someone pointed out, fairly, that one number is the easy case. Most real negotiations have a lot of moving pieces at once, and no single outcome you could call correct.
 
-v1 negotiated a single liability cap on a one-dimensional, zero-sum line, which collapsed into a midpoint-split exploit. v2 makes the deal a vector of terms that each side weights differently, so the game becomes positive-sum: the only way to score well is to trade across issues (logrolling), which a naive 50/50 split cannot do.
+This version handles that harder case. The AI negotiates a whole contract with eight different terms. There is still nobody judging it. The score comes from the deal itself, by measuring how close the two sides got to the best deal they both could have accepted.
+
+That is the whole point. You can put a real score on something fuzzy without a judge, even when there is no clear right answer, and the score is good enough to train an AI to get better at it.
+
+One honest note. A person still has to decide up front how much each term is worth. Once that is set, the negotiation scores itself.
+
+A bit more technically: the first version was a single number where one side's gain was the other side's loss, and it could be gamed by just meeting in the middle. This version has many terms, and the two sides care about different ones, so they can trade. Giving up something you do not mind in order to keep something you do is what makes a good deal here, and splitting everything down the middle does not get you there.
 
 ### Datasets
 - **Primary dataset(s)**: Procedurally sampled negotiation scenarios. Each scenario draws private buyer and vendor weight vectors over a fixed set of MSA terms, plus a BATNA per side.
