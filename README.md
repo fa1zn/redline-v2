@@ -60,7 +60,7 @@ Client value rose 12% and the model traded across terms more, but it also walked
 ### Quickstart
 
 ```bash
-prime env install redline-v2
+prime env install fa1zvn/redline-v2
 prime eval run redline-v2
 ```
 
