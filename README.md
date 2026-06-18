@@ -5,7 +5,15 @@
 - **Short description**: Multi-term contract negotiation where the model trades across interdependent terms against an opposing-counsel vendor, scored by a verifiable Pareto-frontier reward with no judge in the loop.
 - **Tags**: multi-turn, negotiation, legal, self-play, train, eval
 
-This is the v2 extension of RedlineBench. v1 negotiated a single liability cap on a one-dimensional, zero-sum line, which collapsed into a midpoint-split exploit. v2 makes the deal a vector of terms that each side weights differently, so the game becomes positive-sum: the only way to score well is to trade across issues (logrolling), which a naive 50/50 split cannot do.
+### The thesis
+
+This project is one bet: you can build verifiable rewards for soft domains, no judge in the loop. Math and code are easy to grade because the answer checks itself. Negotiation is supposedly not, so people grade it with a human or an LLM judge. This says you don't have to.
+
+v1 made the claim on the easy case: it scored a single liability cap as one number. The fair pushback was that real soft domains have no single right answer, they are multi-objective and full of tradeoffs, and there the judge comes back. v2 is that hard case. The deal is now a vector of terms each side weights differently, so there is no single best outcome, only better and worse trades. And the reward still comes with no judge, because it falls out of the structure of the deal itself: how close the agreement sits to the best possible trade between the two sides (the Pareto frontier).
+
+So the throughline is v1 to v2: from "soft domains can be scored" to "even multi-objective soft domains with no answer key can be scored from their own structure, and the signal is strong enough to optimize against." The honest boundary: the remaining human-judgment step is putting numbers on the objectives (how much each term is worth). Everything after that grades itself.
+
+v1 negotiated a single liability cap on a one-dimensional, zero-sum line, which collapsed into a midpoint-split exploit. v2 makes the deal a vector of terms that each side weights differently, so the game becomes positive-sum: the only way to score well is to trade across issues (logrolling), which a naive 50/50 split cannot do.
 
 ### Datasets
 - **Primary dataset(s)**: Procedurally sampled negotiation scenarios. Each scenario draws private buyer and vendor weight vectors over a fixed set of MSA terms, plus a BATNA per side.
