@@ -33,6 +33,30 @@ The reward is computed from the deal's position on the Pareto frontier of the tw
 
 A naive deal that splits every term at 0.5 sits strictly inside the frontier and scores poorly. A deal that concedes the terms the buyer values little and holds the terms it values highly reaches the frontier and scores high. Run `python scoring.py` to see the midpoint deal scored as Pareto-dominated.
 
+### Results
+
+Baseline across six models, 24 scenarios with 3 rollouts each, uniform 4000 max tokens. Reward is client surplus captured, 0 to 1. For reference, a model that splits every term 50/50 scores about 0.43, and a perfect-trade oracle scores 1.0.
+
+| model | reward (avg ± std) | efficiency | logroll | deal rate |
+|---|---|---|---|---|
+| claude-sonnet-4.5 | 0.521 ± 0.116 | 0.813 | 0.365 | 1.000 |
+| openai/gpt-5 | 0.515 ± 0.260 | 0.670 | 0.364 | 0.819 |
+| deepseek-v4-flash | 0.506 ± 0.167 | 0.793 | 0.394 | 0.958 |
+| openai/gpt-4.1-mini | 0.494 ± 0.205 | 0.749 | 0.397 | 0.917 |
+| claude-haiku-4.5 | 0.455 ± 0.143 | 0.768 | 0.274 | 0.958 |
+| openai/gpt-4.1-nano | 0.375 ± 0.163 | 0.759 | 0.303 | 0.986 |
+
+Two things stand out. The top three overlap inside their error bars, so the frontier is a statistical tie. And every model lands just above the naive 50/50 line and far below the oracle, with logrolling never passing 0.40. The models grow the joint pie but capture little of it for their own client, and they barely trade across terms.
+
+Optimizing the system prompt with GEPA (gpt-4.1-mini, prompt only, no weight training) moved the number and exposed a tradeoff:
+
+| gpt-4.1-mini | reward | efficiency | logroll | deal rate |
+|---|---|---|---|---|
+| baseline prompt | 0.494 | 0.749 | 0.397 | 0.917 |
+| GEPA-optimized | 0.555 | 0.655 | 0.468 | 0.764 |
+
+Client value rose 12% and the model traded across terms more, but it also walked away from more deals. GEPA turned a mild negotiator into an aggressive one: higher value per closed deal, fewer deals closed.
+
 ### Quickstart
 
 ```bash
