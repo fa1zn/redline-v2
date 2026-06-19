@@ -101,17 +101,17 @@ def vendor_decision(
 class RedlineV2Env(vf.MultiTurnEnv):
     """Multi-term contract negotiation with a verifiable, frontier-based reward."""
 
-    def __init__(self, dataset, rubric, system_prompt, total_rounds=4,
+    def __init__(self, dataset, rubric, system_prompt, max_turns=4,
                  eval_dataset=None, **kwargs):
         super().__init__(
             dataset=dataset,
             rubric=rubric,
             system_prompt=system_prompt,
             eval_dataset=eval_dataset,
-            max_turns=total_rounds,
+            max_turns=max_turns,
             **kwargs,
         )
-        self.total_rounds = total_rounds
+        self.max_turns = max_turns
 
     async def setup_state(self, state: vf.State, **kwargs) -> None:
         info = state.get("info", {})
@@ -131,7 +131,7 @@ class RedlineV2Env(vf.MultiTurnEnv):
         s = sc.scenario_from_info(state["scenario_info"])
         names = state["term_names"]
         state["round_num"] += 1
-        rn, total = state["round_num"], self.total_rounds
+        rn, total = state["round_num"], self.max_turns
 
         last = messages[-1].get("content", "") if messages else ""
         buyer_x = parse_package(last, names, state["buyer_x"])
@@ -235,7 +235,7 @@ SYSTEM_PROMPT = (
 # ============================================================================
 
 def load_environment(
-    total_rounds: int = 4,
+    max_turns: int = 4,
     num_train: int = 64,
     num_eval: int = 32,
     seed: int = 0,
@@ -256,6 +256,6 @@ def load_environment(
         eval_dataset=eval_dataset,
         rubric=rubric,
         system_prompt=system_prompt or SYSTEM_PROMPT,
-        total_rounds=total_rounds,
+        max_turns=max_turns,
         **kwargs,
     )
