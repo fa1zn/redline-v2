@@ -135,6 +135,19 @@ class RedlineV2Env(vf.MultiTurnEnv):
         state["round_num"] += 1
         rn, total = state["round_num"], self.max_turns
 
+        # Reasoning models can return an assistant turn with content=None (the
+        # whole token budget went to hidden reasoning, leaving no answer text).
+        # Left as-is, that empty turn makes the NEXT API call fail with
+        # "content is required", aborting the rollout. Sanitize it in place so
+        # the transcript stays a valid chat history; the offer then simply falls
+        # back to the previous package via parse_package below. This keeps the
+        # env robust to reasoning models regardless of max_tokens.
+        if messages and messages[-1].get("role") == "assistant" and not messages[-1].get("content"):
+            fixed = dict(messages[-1])
+            fixed["content"] = "{}"            # empty offer -> fallback to prior package
+            fixed.pop("reasoning_content", None)  # don't resend the (large) reasoning trace
+            messages[-1] = fixed
+
         last = messages[-1].get("content", "") if messages else ""
         buyer_x = parse_package(last, names, state["buyer_x"])
         state["buyer_x"] = buyer_x
