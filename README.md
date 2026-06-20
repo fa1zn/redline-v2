@@ -13,9 +13,32 @@ The first version scored a negotiation as a single number. That worked, but it w
 - A scorekeeper that grades a finished contract from the client's side, with no judge
 - Eight terms the two sides weight differently, so the skill being tested is trading across them (logrolling), not splitting them
 - An opposing-counsel vendor that counters offers and walks away from flat, untraded offers
+- A six-model frontier baseline, all measured by the same verifiable reward
 - A verified skill gradient (no API, no judge) showing exactly what the reward rewards
 
-![A flat constant the vendor walks from scores 0, naive splitting 0.24, a rule-based logroller that reads the counters 0.46, and optimal logrolling 1.0](redline_v2_baseline.png)
+![Six frontier models all score below a 20-line counter-reading bot (0.46); gpt-5 scores 0.02, closing almost no deals; the optimal-play ceiling is 1.0](redline_v2_baseline.png)
+
+## The finding: frontier models negotiate worse than a 20-line script
+
+Six frontier models, n=32 each, same verifiable reward, reasoning models given an
+8000-token budget:
+
+| model | buyer reward | closes |
+| --- | --- | --- |
+| gpt-5 | **0.02** | 3% |
+| gpt-4.1-nano | 0.16 | 44% |
+| deepseek-v4-flash | 0.16 | 28% |
+| claude-sonnet-4.5 | 0.21 | 38% |
+| gpt-4.1-mini | 0.23 | 44% |
+| claude-haiku-4.5 | 0.23 | 50% |
+
+Every model scores at or below a naive 50/50 split (0.24) and far below a 20-line
+rule-based bot (0.46) that just reads the vendor's counters and trades. The most
+advanced model, gpt-5, is the **worst**: it anchors so aggressively (its own
+reasoning says "hold firm at 0.9-0.95") that it almost never concedes enough to
+close, walking away from 31 of 32 deals. The other models adapt and close 28-50%,
+so the environment is clearly winnable; gpt-5 specifically fails by refusing to
+trade. Same prompt for every model.
 
 ## What the reward actually requires
 
@@ -37,14 +60,17 @@ has a genuine, climbable skill gradient with no judge anywhere.
 
 ## Status
 
-Environment and the verified skill gradient above are complete. The headline open
-question: **do frontier models clear the bar a 20-line heuristic sets?** A six-model
-sweep was run against an earlier, softer vendor; those numbers are being re-run under
-this hardened vendor and are not reported here until they are. (An earlier GEPA
-prompt-optimization run lifted gpt-4.1-mini under the old vendor; also pending re-run.)
+Environment, the verified skill gradient, and the six-model frontier baseline are
+complete. The reward has a real, climbable gradient (a rule-based logroller reaches
+0.46, optimal is 1.0), and a small base model sits in the trainable range (44% close
+rate, non-degenerate reward spread), so the next step is RL training a model to beat
+the frontier baseline.
 
 Caveats: the opposing counsel is a fixed rule-based policy and the scenarios are
-synthetic, so this is a research setup, not solved contract negotiation.
+synthetic, so this is a research probe, not solved contract negotiation. n=32 per
+model; the deal-or-no-deal reward makes per-model variance high, so treat the
+ranking among the mid-pack models as approximate (gpt-5's collapse and the gap to
+the bot are the robust results).
 
-Live on the Prime Intellect Hub: `prime env install fa1zvn/redline-v2`. Next: the
-frontier-model sweep under the hardened vendor, then self-play training.
+Live on the Prime Intellect Hub: `prime env install fa1zvn/redline-v2`. Next:
+self-play / RL training a model to clear the 20-line bot's bar.
