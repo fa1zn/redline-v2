@@ -71,6 +71,8 @@ def vendor_decision(
     each round. Its counter concedes on the terms it weights low and holds firm
     on the terms it weights high, which leaks its priorities to a buyer paying
     attention. That signal is what makes inference (and logrolling) learnable.
+    The vendor's walkaway (BATNA) is set high enough that a flat, untraded offer
+    fails to clear it; only a deal that concedes the vendor's priorities does.
     """
     uv = sc.vendor_utility(s, buyer_x)
 

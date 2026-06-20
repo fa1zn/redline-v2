@@ -112,7 +112,10 @@ def sample_scenario(rng: random.Random, terms: list[Term] | None = None) -> Scen
     return Scenario(
         terms=terms,
         buyer=Profile(weights=wb, batna=round(rng.uniform(0.2, 0.4), 3)),
-        vendor=Profile(weights=wv, batna=round(rng.uniform(0.2, 0.4), 3)),
+        # Vendor walkaway is set above what a flat, untraded offer yields (a
+        # constant 0.6 gives the vendor only 0.4), so clearing it requires
+        # conceding the vendor's priorities, i.e. actually trading.
+        vendor=Profile(weights=wv, batna=round(rng.uniform(0.45, 0.55), 3)),
         label=f"sampled-{n}term",
     )
 

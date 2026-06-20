@@ -12,40 +12,39 @@ The first version scored a negotiation as a single number. That worked, but it w
 
 - A scorekeeper that grades a finished contract from the client's side, with no judge
 - Eight terms the two sides weight differently, so the skill being tested is trading across them (logrolling), not splitting them
-- An opposing-counsel vendor that counters offers and can walk away
-- A baseline across six frontier models, with reference baselines and error bars
-- A GEPA prompt-optimization result, reported separately from the baselines
+- An opposing-counsel vendor that counters offers and walks away from flat, untraded offers
+- A verified skill gradient (no API, no judge) showing exactly what the reward rewards
 
-![Six frontier models cluster near 0.50, statistically tied and no better than a blind constant, far below the logrolling ceiling of 1.0](redline_v2_baseline.png)
+![A flat constant the vendor walks from scores 0, naive splitting 0.24, a rule-based logroller that reads the counters 0.46, and optimal logrolling 1.0](redline_v2_baseline.png)
 
-## Baselines: what skill is worth here
+## What the reward actually requires
 
-To make the model numbers legible, three reference policies are scored through the
-real vendor loop and reward, with no API and no judge (`python baselines.py`):
+The vendor's walkaway is set above what a flat, untraded offer yields, so the only
+way to close a good deal is to infer the vendor's priorities from its counters and
+trade. Four reference policies, scored through the real vendor loop and reward with
+no API and no judge (`python baselines.py`, n=3000):
 
-| policy | buyer reward | what it is |
-| --- | --- | --- |
-| naive split `[0.5]×8` | 0.36 | the dumb anchor: split every term down the middle |
-| **blind constant `[0.6]×8`** | **0.55** | ignores every counter, never trades; no negotiation skill |
-| logroll oracle (full info) | 1.00 | concedes the vendor's priorities, holds its own; the ceiling |
+| policy | buyer reward | closes | what it is |
+| --- | --- | --- | --- |
+| blind constant `[0.6]×8` | **0.00** | 0% | ignores every counter; the vendor just walks |
+| naive split `[0.5]×8` | 0.24 | 51% | split every term down the middle |
+| **rule-based logroller** | **0.46** | 62% | ~20 lines: reads the counters, concedes what the vendor wants and it values least, holds the rest |
+| logroll oracle (full info) | 1.00 | 100% | optimal trade; the ceiling |
+
+The point: not-trading is near-worthless (the vendor walks), a simple counter-reading
+heuristic captures real value, and optimal logrolling is the 1.0 ceiling. The reward
+has a genuine, climbable skill gradient with no judge anywhere.
 
 ## Status
 
-Environment, baseline, and a GEPA result complete. **The six frontier models all
-score ~0.50 — statistically tied with each other (n=72, error bars overlap), and
-at the level of a blind constant that ignores the vendor entirely.** They reach
-efficient deals but capture little value for their own client, and sit far below
-the logrolling ceiling of 1.00. In other words, none of them actually trade across
-terms; they negotiate no better than a policy with no negotiation skill. GEPA
-prompt-optimization lifted gpt-4.1-mini from its 0.47 baseline to 0.55 (a separate,
-annotated point on the chart, not part of the baseline sweep), but made it more
-aggressive: more value per deal, fewer deals closed.
+Environment and the verified skill gradient above are complete. The headline open
+question: **do frontier models clear the bar a 20-line heuristic sets?** A six-model
+sweep was run against an earlier, softer vendor; those numbers are being re-run under
+this hardened vendor and are not reported here until they are. (An earlier GEPA
+prompt-optimization run lifted gpt-4.1-mini under the old vendor; also pending re-run.)
 
 Caveats: the opposing counsel is a fixed rule-based policy and the scenarios are
-synthetic, so this is a research setup, not solved contract negotiation. A known
-limitation the baselines expose: the blind constant reaches 0.55, so the reward
-has a flat-ish basin a future RL run could settle into before learning to trade —
-hardening the vendor against that (without breaking the logroll ceiling) is the
-main open design problem before training.
+synthetic, so this is a research setup, not solved contract negotiation.
 
-Live on the Prime Intellect Hub: `prime env install fa1zvn/redline-v2`. Next: self-play training, and grounding the term values in a real contract playbook.
+Live on the Prime Intellect Hub: `prime env install fa1zvn/redline-v2`. Next: the
+frontier-model sweep under the hardened vendor, then self-play training.
