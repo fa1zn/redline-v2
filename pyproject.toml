@@ -2,7 +2,7 @@
 name = "redline-v2"
 description = "Multi-term contract negotiation with a verifiable, Pareto-frontier reward (no judge)"
 tags = ["multi-turn", "negotiation", "legal", "self-play", "train", "eval"]
-version = "0.1.6"
+version = "0.2.0"
 requires-python = ">=3.10"
 dependencies = [
     "verifiers>=0.1.14",
@@ -14,7 +14,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["redline_v2.py", "scoring.py", "pyproject.toml"]
+include = ["redline_v2.py", "scoring.py", "baselines.py", "pyproject.toml", "README.md"]
 
 [tool.verifiers.eval]
 num_examples = 16
