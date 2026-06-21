@@ -15,7 +15,7 @@ max_tokens = 512
 enable_thinking = false
 
 [[env]]
-id = "fa1zvn/redline-v2"
+id = "fa1zvn/redline-v2@0.2.1"
 # Denser training reward: no-deal offers score by how close they came, so a weak
 # base with a low close rate still gets gradient. Clean buyer_score is reported as
 # a metric. Verified to cut GRPO dead groups from ~34% to ~3% on Qwen3.5-4B.
@@ -31,4 +31,4 @@ rollouts_per_example = 1
 eval_base_model = true
 
 [[eval.env]]
-id = "fa1zvn/redline-v2"
+id = "fa1zvn/redline-v2@0.2.1"
