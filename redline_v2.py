@@ -187,8 +187,32 @@ def _outcome(state: vf.State) -> sc.Outcome:
 
 
 async def negotiation_reward(state: vf.State) -> float:
-    """Verifiable reward: buyer surplus captured vs. the best feasible deal."""
+    """Verifiable reward: buyer surplus captured vs. the best feasible deal.
+    This is the clean evaluation metric: 0 on no deal, buyer_score on a deal."""
     return _outcome(state).buyer_score
+
+
+# Cap on the no-deal shaping signal. Kept below a typical closed deal so closing
+# a good deal always dominates hovering near acceptance.
+SHAPE_MAX = 0.15
+
+
+async def shaped_negotiation_reward(state: vf.State) -> float:
+    """Denser TRAINING reward. On a closed deal it is the clean buyer_score. On a
+    walk-away it returns how close the last offer came to the vendor's walkaway
+    (vendor utility over its BATNA), scaled small. This turns the flat no-deal
+    cliff into a slope, so a base model that closes few deals still gets a
+    gradient toward conceding enough to close. The clean buyer_score is reported
+    as a metric, so evaluation numbers are unchanged; only the training signal is
+    denser. Enable with load_environment(train_shaping=True)."""
+    if state.get("deal_reached"):
+        return _outcome(state).buyer_score
+    s = sc.scenario_from_info(state["scenario_info"])
+    bx = state.get("buyer_x")
+    if not bx or s.vendor.batna <= 0:
+        return 0.0
+    closeness = sc.vendor_utility(s, bx) / s.vendor.batna
+    return SHAPE_MAX * max(0.0, min(1.0, closeness))
 
 
 async def efficiency_metric(state: vf.State) -> float:
@@ -255,12 +279,20 @@ def load_environment(
     num_eval: int = 32,
     seed: int = 0,
     system_prompt: Optional[str] = None,
+    train_shaping: bool = False,
     **kwargs,
 ) -> vf.Environment:
     dataset = build_dataset(num_train, seed=seed)
     eval_dataset = build_dataset(num_eval, seed=seed + 1000)
 
-    rubric = vf.Rubric(funcs=[negotiation_reward])
+    # Default: the clean buyer_score is the reward (evaluation). For RL training
+    # against a weak base model, train_shaping=True swaps in the denser shaped
+    # reward and reports the clean buyer_score as a metric instead.
+    if train_shaping:
+        rubric = vf.Rubric(funcs=[shaped_negotiation_reward])
+        rubric.add_metric(negotiation_reward)
+    else:
+        rubric = vf.Rubric(funcs=[negotiation_reward])
     rubric.add_metric(efficiency_metric)
     rubric.add_metric(pareto_gap_metric)
     rubric.add_metric(logroll_metric)
