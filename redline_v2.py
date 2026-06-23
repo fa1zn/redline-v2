@@ -231,6 +231,20 @@ async def deal_rate_metric(state: vf.State) -> float:
     return 1.0 if state.get("deal_reached") else 0.0
 
 
+async def trade_alignment_metric(state: vf.State) -> float:
+    """Faithful behavioral metric: did the agent concede the terms the vendor
+    values more than the buyer does (real logrolling), as opposed to just pushing
+    terms to extremes? Unlike logroll_index, this can't be faked by aggressiveness.
+    0.0 on no deal."""
+    if not state.get("deal_reached"):
+        return 0.0
+    s = sc.scenario_from_info(state["scenario_info"])
+    x = state.get("final_x")
+    if not x:
+        return 0.0
+    return sc.concession_alignment(s, x)
+
+
 # ============================================================================
 # Dataset
 # ============================================================================
@@ -296,6 +310,7 @@ def load_environment(
     rubric.add_metric(efficiency_metric)
     rubric.add_metric(pareto_gap_metric)
     rubric.add_metric(logroll_metric)
+    rubric.add_metric(trade_alignment_metric)
     rubric.add_metric(deal_rate_metric)
 
     return RedlineV2Env(
