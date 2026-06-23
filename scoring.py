@@ -229,6 +229,32 @@ def score(s: Scenario, x: list[float] | None, deal_reached: bool = True) -> Outc
                    buyer_score, nash_product, round(spread, 4))
 
 
+def concession_alignment(s: Scenario, x: list[float]) -> float:
+    """Faithful trade-quality metric for behavioral analysis.
+
+    The raw logroll index measures distance from the 50/50 midpoint, which is
+    just extremeness: an aggressive policy that pushes every term to an extreme
+    scores high without doing any real trading. This instead asks the question
+    that actually defines logrolling: did the buyer concede on the terms the
+    vendor values MORE than the buyer does?
+
+    Pearson correlation across terms between concession (1 - x_i) and
+    (vendor_weight_i - buyer_weight_i). ~0.5+ = genuine logrolling, ~0 = pushing
+    terms to extremes without reading the other side. Not foolable by extremeness.
+    """
+    import math
+    n = len(s.terms)
+    if n == 0:
+        return 0.0
+    conc = [1.0 - xi for xi in x]
+    diff = [s.wv[i] - s.wb[i] for i in range(n)]
+    mc, md = sum(conc) / n, sum(diff) / n
+    num = sum((conc[i] - mc) * (diff[i] - md) for i in range(n))
+    dc = math.sqrt(sum((conc[i] - mc) ** 2 for i in range(n)))
+    dd = math.sqrt(sum((diff[i] - md) ** 2 for i in range(n)))
+    return num / (dc * dd) if dc > 1e-9 and dd > 1e-9 else 0.0
+
+
 # ---------------------------------------------------------------------------
 # Demo: prove the midpoint exploit is Pareto-dominated
 # ---------------------------------------------------------------------------
