@@ -1,41 +1,42 @@
-# RedlineBench v2 — LinkedIn post (draft)
+# RedlineBench v2 — post
 
-Visual: redline_v2_baseline.png (attach it)
+**Image:** `redline_v1_v2.png` (your two runs: v1 one-clause prototype barely moving,
+v2 full-contract 4B climbing past the frontier-model and 20-line-script reference
+lines). Your figure, your data. The alignment proof lives in the copy. The Applied
+Compute / Harvey link is made in the words, not by borrowing their chart.
 
----
-
-Harvey named the open problem in contract AI. It's an agent that can negotiate against a live opponent and learn from it.
-
-I built it. Tested six of the top models, and they all lost to a 20-line script. GPT-5 was the worst, one closed deal out of 32.
-
-It's a controlled setup on purpose. Eight contract terms, a counterparty that counters and walks, and a score that comes from the math of the final deal instead of a human or another model grading it. A verifiable reward for work everyone assumes needs a judge.
-
-The failure is specific. Winning means trading, conceding the terms you don't care about to win the ones you do. The models don't. They split everything down the middle, or like GPT-5 they come down a little but stay too greedy to close, clinging to one term while the deal dies. They sound like they're negotiating. They aren't trading.
-
-This is the bottleneck for deploying negotiation agents. You can't hand a real contract to something that blows up the deal or quietly gives away the store. What's new is you can now measure that without a judge, and train against it.
-
-Next: a model trained to actually trade, then taught when to escalate to a human instead of conceding.
-
-Writeup and environment in comments.
+**Headline number:** 0.11 -> ~0.55 (the sustained back-half level). Do NOT cite 0.64;
+that was a single-step spike and citing it reads as cherry-picking.
 
 ---
 
-## Prep: questions a sharp reader will ask, and plain answers
+## Post (LinkedIn / X long form) — researcher voice, lay can still follow
 
-**"How is this different from / competing with Harvey's LAB?"**
-It isn't competing. LAB is the realistic, expert-graded benchmark, real contracts, playbooks, escalation memos. Mine is a minimal open sandbox for one mechanic they flagged as missing: an interactive opponent with a verifiable reward you can train against. Different altitude, same direction. I would never claim it's in LAB's league on realism.
+To train a model on knowledge work you need a grader, and with no answer key that's usually another model. I work on the cases where you don't need one: outcomes you can score with math and train against directly.
 
-**"Isn't this just a synthetic game with a fixed opponent?"**
-Yes, and I say so in the post. Fixed rule-based vendor, synthetic scenarios. It's a controlled probe, not solved negotiation. The point is the scoring method (math, no judge) and that even in this clean setting strong models fail in a legible way.
+Applied Compute and Harvey just showed how strong the judge-based version is, training an open model past GPT-5.5 on Harvey's legal benchmark. Negotiation doesn't need that judge. The value of a settlement is computable, so the reward is arithmetic on the final deal.
 
-**"gpt-5 scoring 0.02 sounds like a harness bug."**
-It started as one. gpt-5 is a reasoning model; at a low token budget it spent everything on hidden reasoning and returned no answer, which crashed the rollout. I fixed the env to tolerate that and gave it an 8000-token budget. With that fixed it closes 1 of 32 because it anchors at 0.9 to 0.95 and won't concede. Other models, same prompt, close 30 to 50 percent. The zero is real behavior.
+My first version was a single clause, and mostly showed how easily a model games the reward instead of earning it. The second is a full contract, eight weighted terms against a counterparty that counters and walks. I trained a 4B on it.
 
-**"Is the vendor just too harsh, so nobody can win?"**
-No. The 20-line bot wins at 0.46, optimal is 1.0, five of six models close deals. Winnable. gpt-5 throws it away.
+The frontier models never learned to trade: GPT-5, Claude, and the rest score below a 20-line script that just concedes whatever the other side doesn't care about. The 4B did learn. Buyer score rose from 0.11 to about 0.55, past the script, by giving ground on the terms the counterparty valued most, which is the part you can't fake by being aggressive.
 
-**"How is the reward verifiable with no judge?"**
-Each side has private weights on the eight terms. Reward is the buyer's captured value, normalized against the best deal on the Pareto frontier the vendor would still accept. Arithmetic on the final contract. No model grades anything.
+Synthetic, one slice, and real legal work still needs a judge. But wherever the outcome is computable, the reward costs nothing and can't be hacked, and it still teaches a small model the skill.
 
-**"What's next?"**
-Train a small model against it and see if it learns to read the counters and trade. The reward has a real gradient (bot 0.46, optimal 1.0) and a small base model sits in a trainable range, so the run should catch signal. Longer term, wire up escalation (knowing when a term is past your authority and you have to escalate instead of concede), which is the part LAB centers.
+Writeup and environment in the comments.
+
+---
+
+## Framing guardrails (what NOT to say)
+
+- Do not claim your result matches or rivals Harvey/AC. Different task, different
+  metric, different scale. The connection is the *idea* (score interpretive work),
+  not the numbers.
+- Do not put your synthetic toy and their real-LAB result on one shared axis as if
+  comparable. The link goes in the prose.
+- Keep the scope caveat in the post (synthetic, one slice, real work still needs a
+  judge). It is what makes the rest credible.
+
+## First comment (links)
+
+Writeup: <link>
+Environment (Prime Hub): https://app.primeintellect.ai/dashboard/environments/fa1zvn/redline-v2

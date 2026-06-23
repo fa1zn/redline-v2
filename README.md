@@ -58,19 +58,39 @@ The point: not-trading is near-worthless (the vendor walks), a simple counter-re
 heuristic captures real value, and optimal logrolling is the 1.0 ceiling. The reward
 has a genuine, climbable skill gradient with no judge anywhere.
 
+## Training result: a 4B model learns to trade
+
+Post-trained Qwen3.5-4B on this environment with GRPO (hosted on Prime Intellect, 70
+steps, denser shaped reward during training, clean buyer score reported as the
+metric). The clean buyer score climbed from a 0.11 base to about 0.55, past the
+20-line script (0.46) and every frontier model (0.16-0.23). A separate
+concession-alignment metric, which measures whether the model gives ground on the
+terms the vendor values more than the buyer does (real logrolling, not just
+aggression), rose alongside the reward, so the gain is genuine trading rather than
+reward hacking.
+
+![v1 (one clause, first attempt) barely moves; v2 (full contract, 4B) climbs from 0.11 to ~0.55, past the frontier-model and 20-line-script reference lines](redline_v1_v2.png)
+
+The training reward used a small dense no-deal shaping term to avoid zero-variance
+GRPO batches on a weak base model (it cut dead groups from ~34% to ~3%); evaluation
+is always the clean, unshaped buyer score.
+
 ## Status
 
-Environment, the verified skill gradient, and the six-model frontier baseline are
-complete. The reward has a real, climbable gradient (a rule-based logroller reaches
-0.46, optimal is 1.0), and a small base model sits in the trainable range (44% close
-rate, non-degenerate reward spread), so the next step is RL training a model to beat
-the frontier baseline.
+Environment, the verified skill gradient, the six-model frontier baseline, and a
+trained model are all complete. The reward has a real, climbable gradient (a
+rule-based logroller reaches 0.46, optimal is 1.0); frontier models score below that
+bar; and a Qwen3.5-4B trained with GRPO clears it, reaching ~0.55 with its
+concession-alignment rising in step, confirming it learned to trade rather than hack
+the score.
 
 Caveats: the opposing counsel is a fixed rule-based policy and the scenarios are
 synthetic, so this is a research probe, not solved contract negotiation. n=32 per
 model; the deal-or-no-deal reward makes per-model variance high, so treat the
 ranking among the mid-pack models as approximate (gpt-5's collapse and the gap to
-the bot are the robust results).
+the bot are the robust results). The 0.55 figure is the sustained back-half level of
+the run, not the single-step peak.
 
 Live on the Prime Intellect Hub: `prime env install fa1zvn/redline-v2`. Next:
-self-play / RL training a model to clear the 20-line bot's bar.
+a learned opposing counsel (self-play) and an escalation action for terms past the
+agent's authority.
