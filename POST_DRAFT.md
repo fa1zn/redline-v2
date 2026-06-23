@@ -36,7 +36,10 @@ Writeup and environment in the comments.
 - Keep the scope caveat in the post (synthetic, one slice, real work still needs a
   judge). It is what makes the rest credible.
 
-## First comment (links)
+## First comment (paste under the post)
 
-Writeup: <link>
-Environment (Prime Hub): https://app.primeintellect.ai/dashboard/environments/fa1zvn/redline-v2
+Environment, code, and the full writeup, including the training result and the honest caveats: https://app.primeintellect.ai/dashboard/environments/fa1zvn/redline-v2
+
+Run it yourself: prime env install fa1zvn/redline-v2
+
+v1, the single-clause version and the reward-hacking postmortem that taught me to validate the reward before training: https://github.com/fa1zn/redlinebench
